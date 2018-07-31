@@ -16,8 +16,8 @@ class UQDataCharge {
     return this.browser.close()
   }
 
-  requireSiqnin () {
-    this.debug('requireSiqnin')
+  requireLogin () {
+    this.debug('requireLogin')
 
     if (!this.signedIn) throw new Error('Login needed!')
   }
@@ -25,8 +25,8 @@ class UQDataCharge {
   /**
    * @returns Promise<void>
    */
-  async signin (username, password) {
-    this.debug('signin')
+  async login (username, password) {
+    this.debug('login')
 
     if (this.browser || this.page) throw new Error('The page opened!')
   
@@ -73,7 +73,7 @@ class UQDataCharge {
   async getPlanByName (name) {
     this.debug('getPlanByName')
 
-    this.requireSiqnin()
+    this.requireLogin()
     const filtered = await this.page.evaluate((plans, name) => {
       return plans.filter(v => v.innerText.includes(name))
     }, this.plans, name)
@@ -86,7 +86,7 @@ class UQDataCharge {
   async openPlanByName (name) {
     this.debug('openPlanByName')
 
-    this.requireSiqnin()
+    this.requireLogin()
     const plan = await this.getPlanByName(name)
     if (!plan) throw new Error('No plan to be opened.')
     const button = await this.page.evaluate((plan) => {
@@ -103,7 +103,7 @@ class UQDataCharge {
   getPurchaseConfirmDialog() {
     this.debug('getPurchaseConfirmDialog')
 
-    this.requireSiqnin()
+    this.requireLogin()
     return this.page.$('#purchaseConfirmDialog')
   }
 
@@ -113,7 +113,7 @@ class UQDataCharge {
   getApproveButtonByConfirmDialog(dialog) {
     this.debug('getApproveButtionByConfirmDialog')
 
-    this.requireSiqnin()
+    this.requireLogin()
 
     return this.page.evaluate(dialog => {
       const approves = Array.from(dialog.getElementsByTagName('button')).filter(
@@ -127,7 +127,7 @@ class UQDataCharge {
   async approvePurchase() {
     this.debug('approvePurchase')
 
-    this.requireSiqnin()
+    this.requireLogin()
     const dialog = await this.getPurchaseConfirmDialog()
     const button = await this.getApproveButtonByConfirmDialog(dialog)
     button.click()
@@ -136,7 +136,7 @@ class UQDataCharge {
 
 async function main() {
   const dc = new UQDataCharge()
-  await dc.signin(process.env.UQ_AUTO_DATA_CHARGE_USERNAME, process.env.UQ_AUTO_DATA_CHARGE_PASSWORD)
+  await dc.login(process.env.UQ_AUTO_DATA_CHARGE_USERNAME, process.env.UQ_AUTO_DATA_CHARGE_PASSWORD)
   await dc.openPlanByName('まとめてチャージ')
   await dc.approvePurchase()
   dc.destructor()
