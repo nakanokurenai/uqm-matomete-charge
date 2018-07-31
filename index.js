@@ -6,7 +6,7 @@ class UQDataCharge {
     const debug = this.debug = require('debug')('uq-data-charge')
     debug('constructor')
     this.plans = null
-    this.signedIn = false
+    this.onLogin = false
     this.browser = null
     this.page = null
   }
@@ -19,7 +19,7 @@ class UQDataCharge {
   requireLogin () {
     this.debug('requireLogin')
 
-    if (!this.signedIn) throw new Error('Login needed!')
+    if (!this.onLogin) throw new Error('Login needed!')
   }
 
   /**
@@ -52,7 +52,7 @@ class UQDataCharge {
     if (!url.startsWith('https://dc.uqmobile.jp/home')) {
       throw new Error('Failed to login')
     }
-    this.signedIn = true
+    this.onLogin = true
 
     this.plans = await this.getPlans()
     return
