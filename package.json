@@ -1,17 +1,8 @@
 {
-  "name": "uq-auto-charge",
-  "version": "1.0.0",
-  "description": "",
+  "name": "uqm-matomete-charge",
   "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "nakanokurenai:nakanokurenai/uq-auto-charge.git"
-  },
-  "author": "",
-  "license": "ISC",
+  "author": "nakanokurenai <master@yukarium.net>",
+  "private": true,
   "dependencies": {
     "debug": "^3.1.0",
     "puppeteer": "^1.6.1"
