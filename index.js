@@ -25,8 +25,12 @@ class UQDataCharge {
   /**
    * @returns Promise<void>
    */
-  async login (username, password) {
+  async login (username, password, retry=0) {
     this.debug('login')
+
+    if (retry > 3) {
+      throw new Error('Failed to login!')
+    }
 
     if (this.browser || this.page) throw new Error('The page opened!')
   
@@ -50,7 +54,13 @@ class UQDataCharge {
 
     const url = this.page.mainFrame().url()
     if (!url.startsWith('https://dc.uqmobile.jp/home')) {
-      throw new Error('Failed to login')
+      const msg = await page.evaluate(() => {
+        const elem = document.getElementById('msgPrint')
+        return elem ? elem.innerText : null
+      })
+      if (msg) throw new Error(msg)
+
+      return this.login(username, password, retry+1)
     }
     this.onLogin = true
 
@@ -148,8 +158,7 @@ async function main() {
   await dc.login(process.env.UQ_AUTO_DATA_CHARGE_USERNAME, process.env.UQ_AUTO_DATA_CHARGE_PASSWORD)
   const open = await dc.openPlanByName('まとめてチャージ')
   if (!open) throw new Error()
-  const successful = await dc.approvePurchase()
-  debug(`DC is ${successful}`)
+  await dc.approvePurchase()
   dc.destructor()
 }
 
