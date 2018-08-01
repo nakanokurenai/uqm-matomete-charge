@@ -17,8 +17,6 @@ class UQDataCharge {
   }
 
   requireLogin () {
-    this.debug('requireLogin')
-
     if (!this.onLogin) throw new Error('Login needed!')
   }
 
@@ -101,7 +99,7 @@ class UQDataCharge {
 
     this.requireLogin()
     const plan = await this.getPlanByName(name)
-    if (!plan) throw new Error('No plan to be opened.')
+    if (!plan) return Promise.resolve(false)
   
     return this.page.evaluate((plan) => {
       const buttons = plan.parentNode.getElementsByTagName('button')
@@ -152,17 +150,27 @@ class UQDataCharge {
   }
 }
 
-async function main() {
-  const dc = new UQDataCharge()
-  debug('try to login to', process.env.UQ_AUTO_DATA_CHARGE_USERNAME)
+async function main(dc = new UQDataCharge()) {
   await dc.login(process.env.UQ_AUTO_DATA_CHARGE_USERNAME, process.env.UQ_AUTO_DATA_CHARGE_PASSWORD)
-  const open = await dc.openPlanByName('まとめてチャージ')
-  if (!open) throw new Error()
-  await dc.approvePurchase()
-  dc.destructor()
+
+  const openResult = await dc.openPlanByName('まとめてチャージ')
+  if (!openResult) {
+    debug('Already charged!')
+    return false
+  }
+
+  const result = await dc.approvePurchase()
+
+  return result
 }
 
-main().catch(e => {
-  console.error(e)
-  process.exit(1)
-})
+const dc = new UQDataCharge()
+main(dc)
+  .then(b => {
+    dc.destructor()
+    process.exit(b ? 0 : 3)
+  })
+  .catch(e => {
+    console.error(e)
+    process.exit(1)
+  })
